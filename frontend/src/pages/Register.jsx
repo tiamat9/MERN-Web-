@@ -9,6 +9,32 @@ function Register() {
 
   const onHandleSubmit = (e) => {
     e.preventDefault();
+
+    if (password !== cfmPassword)
+      return alert("Password and Confirm Password must be the same");
+
+    const url = "http://localhost:3500/register";
+
+    const body = {
+      user: username,
+      pwd: password,
+    };
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        navigate("/login");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
     console.log(username, password, cfmPassword);
   };
 

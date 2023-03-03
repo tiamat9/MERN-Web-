@@ -1,4 +1,68 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Home() {
+  const [employees, setEmployees] = useState([]);
+  const navigate = useNavigate();
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await fetch("http://localhost:3500/employees", {
+        credentials: "include",
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("accessToken"),
+        },
+      });
+      if (response.status === 403) return refreshAccessToken();
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    try {
+      const response = await fetch("http://localhost:3500/refresh", {
+        credentials: "include",
+      });
+      if (response.status === 403 || response.status === 401) {
+        navigate("/login");
+        localStorage.removeItem("accessToken");
+        return [];
+      }
+      const data = await response.json();
+      localStorage.setItem("accessToken", data.accessToken);
+      console.log(data);
+      return fetchEmployees();
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      const data = await fetchEmployees();
+      setEmployees(data);
+      console.log("employees", employees);
+    })();
+  }, []);
+
+  const onHandleLogout = async () => {
+    localStorage.removeItem("accessToken");
+    try {
+      await fetch("http://localhost:3500/logout", {
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
+    navigate("/login");
+  };
   return (
     <div className="App">
       <header className="App-header">
@@ -6,8 +70,16 @@ function Home() {
           <div className="hero-content text-center">
             <div className="max-w-md">
               <h1 className="text-5xl font-bold mb-5">Home page</h1>
-
-              <button className="btn btn-secondary">Sign out</button>
+              {employees.length
+                ? employees.map((employee) => (
+                    <div key={employee._id}>
+                      <p>{employee.firstname + " " + employee.lastname}</p>
+                    </div>
+                  ))
+                : null}
+              <button className="btn btn-secondary" onClick={onHandleLogout}>
+                Sign out
+              </button>
             </div>
           </div>
         </div>

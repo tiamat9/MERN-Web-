@@ -8,6 +8,30 @@ function Login() {
 
   const onHandleSubmit = (e) => {
     e.preventDefault();
+    const url = "http://localhost:3500/auth";
+
+    const body = {
+      user: username,
+      pwd: password,
+    };
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(body),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        localStorage.setItem("accessToken", data.accessToken);
+        console.log(data);
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
     console.log(username, password);
   };
 
