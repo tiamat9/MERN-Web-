@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import axios from "../api/axios";
+
 function Register() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [cfmPassword, setCfmPassword] = useState("");
 
-  const onHandleSubmit = (e) => {
+  const onHandleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== cfmPassword)
@@ -20,21 +22,20 @@ function Register() {
       pwd: password,
     };
 
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        navigate("/login");
-      })
-      .catch((error) => {
-        console.error(error);
+    try {
+      const response = await axios.post(url, body, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+
+      const { data } = response;
+
+      console.log(data);
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+    }
     console.log(username, password, cfmPassword);
   };
 

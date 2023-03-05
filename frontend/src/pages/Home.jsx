@@ -1,68 +1,67 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useLogout from "../hooks/useLogout";
+
+import axios from "../api/axios";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 function Home() {
+  const axiosPrivate = useAxiosPrivate();
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
+  const logout = useLogout();
 
   const fetchEmployees = async () => {
     try {
-      const response = await fetch("http://localhost:3500/employees", {
-        credentials: "include",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("accessToken"),
-        },
-      });
-      if (response.status === 403) return refreshAccessToken();
-      const data = await response.json();
-
-      return data;
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  };
-
-  const refreshAccessToken = async () => {
-    try {
-      const response = await fetch("http://localhost:3500/refresh", {
-        credentials: "include",
-      });
-      if (response.status === 403 || response.status === 401) {
-        navigate("/login");
-        localStorage.removeItem("accessToken");
-        return [];
-      }
-      const data = await response.json();
-      localStorage.setItem("accessToken", data.accessToken);
+      const response = await axiosPrivate.get(
+        "http://localhost:3500/employees",
+        {
+          // credentials: "include",
+          withCredentials: true,
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("accessToken"),
+          },
+        }
+      );
+      // const data = await response.json();
+      const { data } = response;
       console.log(data);
-      return fetchEmployees();
+      setEmployees(data);
     } catch (error) {
       console.error(error);
-      return [];
+      return setEmployees([]);
     }
   };
+
+  // const refreshAccessToken = async () => {
+  //   try {
+  //     const response = await axios.get("http://localhost:3500/refresh", {
+  //       // credentials: "include",
+  //       withCredentials: true,
+  //     });
+  //     if (response.status === 403 || response.status === 401) {
+  //       navigate("/login");
+  //       localStorage.removeItem("accessToken");
+  //       return [];
+  //     }
+  //     // const data = await response.json();
+  //     const { data } = response;
+  //     localStorage.setItem("accessToken", data.accessToken);
+  //     console.log(data);
+  //     return fetchEmployees();
+  //   } catch (error) {
+  //     console.error(error);
+  //     return [];
+  //   }
+  // };
 
   useEffect(() => {
-    (async () => {
-      const data = await fetchEmployees();
-      setEmployees(data);
-      console.log("employees", employees);
-    })();
+    fetchEmployees();
   }, []);
 
-  const onHandleLogout = async () => {
-    localStorage.removeItem("accessToken");
-    try {
-      await fetch("http://localhost:3500/logout", {
-        credentials: "include",
-      });
-    } catch (error) {
-      console.error(error);
-    }
-
-    navigate("/login");
-  };
+  // const onHandleLogout = async () => {
+  //   logout();
+  // };
   return (
     <div className="App">
       <header className="App-header">
@@ -77,7 +76,7 @@ function Home() {
                     </div>
                   ))
                 : null}
-              <button className="btn btn-secondary" onClick={onHandleLogout}>
+              <button className="btn btn-secondary" onClick={logout}>
                 Sign out
               </button>
             </div>

@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import axios from "../api/axios";
 
 function Login() {
+  const { setAuth } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const onHandleSubmit = (e) => {
+  const onHandleSubmit = async (e) => {
     e.preventDefault();
     const url = "http://localhost:3500/auth";
 
@@ -15,23 +18,24 @@ function Login() {
       pwd: password,
     };
 
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(body),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        localStorage.setItem("accessToken", data.accessToken);
-        console.log(data);
-        navigate("/");
-      })
-      .catch((error) => {
-        console.error(error);
+    try {
+      const response = await axios.post(url, body, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // credentials: "include",
+        withCredentials: true,
       });
+      const { data } = response;
+      const { roles, accessToken } = data;
+
+      localStorage.setItem("accessToken", data.accessToken);
+      setAuth({ roles, accessToken, isAuthenticated: true });
+      console.log(data);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
     console.log(username, password);
   };
 
