@@ -23,7 +23,6 @@ function Login() {
         headers: {
           "Content-Type": "application/json",
         },
-        // credentials: "include",
         withCredentials: true,
       });
       const { data } = response;
@@ -65,7 +64,7 @@ function Login() {
               <span className="label-text">Password</span>
             </label>
             <input
-              type="text"
+              type="password"
               placeholder="Type here"
               className="input input-bordered w-full max-w-xs mb-5"
               value={password}

@@ -87,7 +87,7 @@ function Register() {
               <span className="label-text">Password</span>
             </label>
             <input
-              type="text"
+              type="password"
               placeholder="Type here"
               className="input input-bordered w-full max-w-xs"
               value={password}
@@ -99,7 +99,7 @@ function Register() {
               <span className="label-text">Confirm Password</span>
             </label>
             <input
-              type="text"
+              type="password"
               placeholder="Type here"
               className="input input-bordered w-full max-w-xs mb-10"
               value={cfmPassword}
